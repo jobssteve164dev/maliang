@@ -111,6 +111,9 @@ export const AgentChat: React.FC<AgentChatProps> = ({
   const handleSendMessage = async () => {
     if (!inputValue.trim() || loading) return;
 
+    console.log('🔍 [DEBUG] AgentChat: Sending message to agent:', selectedAgent.id);
+    console.log('🔍 [DEBUG] AgentChat: Project ID:', projectId);
+
     const userMessage: Message = {
       id: `msg_${Date.now()}`,
       role: 'user',
@@ -131,7 +134,9 @@ export const AgentChat: React.FC<AgentChatProps> = ({
         conversationHistory: messages.slice(-10) // 最近10条消息作为上下文
       };
 
+      console.log('🔍 [DEBUG] AgentChat: Sending context:', context);
       const response = await window.electronAPI.agent.sendMessage(selectedAgent.id, context);
+      console.log('🔍 [DEBUG] AgentChat: Received response:', response);
 
       const assistantMessage: Message = {
         id: `msg_${Date.now() + 1}`,

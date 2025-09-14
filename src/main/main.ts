@@ -221,7 +221,16 @@ class NovelAIApp {
     });
 
     ipcMain.handle('config-set', async (event, key: string, value: any) => {
-      return this.configManager.set(key as any, value);
+      const result = this.configManager.set(key as any, value);
+      
+      // 如果更新的是AI模型配置，重新初始化AI服务
+      if (key === 'aiModels') {
+        console.log('🔍 [DEBUG] AI models config updated, reloading AI service...');
+        this.aiService.reloadConfig();
+        this.agentManager.reloadConfig();
+      }
+      
+      return result;
     });
 
     // AI服务相关
@@ -263,6 +272,9 @@ class NovelAIApp {
 
     // 智能体管理相关
     ipcMain.handle('agent-send-message', async (event, agentId: string, context: any) => {
+      console.log('🔍 [DEBUG] Main: Received agent-send-message request');
+      console.log('🔍 [DEBUG] Main: Agent ID:', agentId);
+      console.log('🔍 [DEBUG] Main: Context:', context);
       return this.agentManager.sendMessage(agentId, context);
     });
 

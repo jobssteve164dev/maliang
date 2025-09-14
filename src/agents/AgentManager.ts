@@ -86,11 +86,17 @@ export class AgentManager {
     agentId: string,
     context: AgentContext
   ): Promise<AgentOutput> {
+    console.log('🔍 [DEBUG] AgentManager: sendMessage called');
+    console.log('🔍 [DEBUG] AgentManager: Agent ID:', agentId);
+    console.log('🔍 [DEBUG] AgentManager: Available agents:', Array.from(this.agents.keys()));
+    
     const agent = this.agents.get(agentId);
     if (!agent) {
+      console.error('❌ [ERROR] AgentManager: Agent not found:', agentId);
       throw new Error(`Agent not found: ${agentId}`);
     }
 
+    console.log('🔍 [DEBUG] AgentManager: Agent found, sending to collaboration hub');
     return await this.collaborationHub.sendMessageToAgent(agentId, context);
   }
 
@@ -317,6 +323,13 @@ export class AgentManager {
   }
 
   // 清理资源
+  // 重新加载配置
+  reloadConfig(): void {
+    console.log('🔍 [DEBUG] AgentManager: Reloading configuration...');
+    this.cleanup();
+    this.initializeAgents();
+  }
+
   cleanup(): void {
     for (const [agentId] of this.agents) {
       this.collaborationHub.unregisterAgent(agentId);
