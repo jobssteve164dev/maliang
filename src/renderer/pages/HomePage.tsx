@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -62,6 +63,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState<NovelProject[]>([]);
   const [recentProjects, setRecentProjects] = useState<NovelProject[]>([]);
   const [projectStats, setProjectStats] = useState<Record<string, any>>({});
@@ -147,7 +149,13 @@ export const HomePage: React.FC = () => {
 
   // 打开项目
   const handleOpenProject = (projectId: string) => {
-    window.location.href = `#/project/${projectId}`;
+    console.log('🔍 [DEBUG] Opening project:', projectId);
+    try {
+      navigate(`/project/${projectId}`);
+      console.log('🔍 [DEBUG] Navigation called successfully');
+    } catch (error) {
+      console.error('❌ [ERROR] Navigation failed:', error);
+    }
   };
 
   // 编辑项目

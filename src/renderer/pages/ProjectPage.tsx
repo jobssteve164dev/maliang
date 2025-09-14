@@ -42,15 +42,16 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
+    <Box
       role="tabpanel"
       hidden={value !== index}
       id={`project-tabpanel-${index}`}
       aria-labelledby={`project-tab-${index}`}
+      sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
       {...other}
     >
       {value === index && children}
-    </div>
+    </Box>
   );
 }
 
@@ -194,7 +195,7 @@ export const ProjectPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* 头部导航 */}
       <Paper sx={{ p: 2, borderRadius: 0 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -301,7 +302,29 @@ export const ProjectPage: React.FC = () => {
       {/* 主要内容区域 */}
       <Box sx={{ flexGrow: 1, display: 'flex', overflow: 'hidden' }}>
         {/* 左侧智能体面板 */}
-        <Paper sx={{ width: 320, borderRadius: 0, borderRight: 1, borderColor: 'divider' }}>
+        <Paper sx={{ 
+          width: 320, 
+          height: '100%',
+          borderRadius: 0, 
+          borderRight: 1, 
+          borderColor: 'divider',
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(0,0,0,0.2)',
+            borderRadius: '3px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'rgba(0,0,0,0.3)',
+          },
+        }}>
           <AgentPanel
             selectedAgent={selectedAgent}
             onAgentSelect={handleAgentSelect}
@@ -344,7 +367,12 @@ export const ProjectPage: React.FC = () => {
           </Paper>
 
           {/* 标签页内容 */}
-          <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <Box sx={{ 
+            flexGrow: 1, 
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
             <TabPanel value={tabValue} index={0}>
               {selectedAgent ? (
                 <AgentChat
@@ -354,7 +382,7 @@ export const ProjectPage: React.FC = () => {
                   availableAgents={availableAgents}
                 />
               ) : (
-                <Box sx={{ p: 3, textAlign: 'center' }}>
+                <Box sx={{ p: 3, textAlign: 'center', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <Typography variant="h6" color="text.secondary" gutterBottom>
                     请选择一个智能体
                   </Typography>
@@ -366,46 +394,118 @@ export const ProjectPage: React.FC = () => {
             </TabPanel>
 
             <TabPanel value={tabValue} index={1}>
-              <Box sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  章节管理
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  章节管理功能正在开发中...
-                </Typography>
+              <Box sx={{ 
+                height: '100%', 
+                overflow: 'auto',
+                '&::-webkit-scrollbar': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'transparent',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'rgba(0,0,0,0.2)',
+                  borderRadius: '3px',
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: 'rgba(0,0,0,0.3)',
+                },
+              }}>
+                <Box sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    章节管理
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    章节管理功能正在开发中...
+                  </Typography>
+                </Box>
               </Box>
             </TabPanel>
 
             <TabPanel value={tabValue} index={2}>
-              <Box sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  角色设定
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  角色管理功能正在开发中...
-                </Typography>
+              <Box sx={{ 
+                height: '100%', 
+                overflow: 'auto',
+                '&::-webkit-scrollbar': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'transparent',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'rgba(0,0,0,0.2)',
+                  borderRadius: '3px',
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: 'rgba(0,0,0,0.3)',
+                },
+              }}>
+                <Box sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    角色设定
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    角色管理功能正在开发中...
+                  </Typography>
+                </Box>
               </Box>
             </TabPanel>
 
             <TabPanel value={tabValue} index={3}>
-              <Box sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  世界构建
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  世界观编辑器正在开发中...
-                </Typography>
+              <Box sx={{ 
+                height: '100%', 
+                overflow: 'auto',
+                '&::-webkit-scrollbar': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'transparent',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'rgba(0,0,0,0.2)',
+                  borderRadius: '3px',
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: 'rgba(0,0,0,0.3)',
+                },
+              }}>
+                <Box sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    世界构建
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    世界观编辑器正在开发中...
+                  </Typography>
+                </Box>
               </Box>
             </TabPanel>
 
             <TabPanel value={tabValue} index={4}>
-              <Box sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  情节规划
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  情节规划工具正在开发中...
-                </Typography>
+              <Box sx={{ 
+                height: '100%', 
+                overflow: 'auto',
+                '&::-webkit-scrollbar': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'transparent',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'rgba(0,0,0,0.2)',
+                  borderRadius: '3px',
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: 'rgba(0,0,0,0.3)',
+                },
+              }}>
+                <Box sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    情节规划
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    情节规划工具正在开发中...
+                  </Typography>
+                </Box>
               </Box>
             </TabPanel>
           </Box>

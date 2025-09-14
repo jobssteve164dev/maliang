@@ -236,9 +236,21 @@ export const AgentChat: React.FC<AgentChatProps> = ({
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ 
+      height: '100%', 
+      display: 'flex', 
+      flexDirection: 'column',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
       {/* 头部 */}
-      <Paper sx={{ p: 2, borderRadius: 0 }}>
+      <Paper sx={{ 
+        p: 2, 
+        borderRadius: 0,
+        flexShrink: 0,
+        borderBottom: 1,
+        borderColor: 'divider'
+      }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar sx={{ bgcolor: getAgentColor(selectedAgent.type) }}>
@@ -270,7 +282,25 @@ export const AgentChat: React.FC<AgentChatProps> = ({
       </Paper>
 
       {/* 消息列表 */}
-      <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+      <Box sx={{ 
+        flex: 1,
+        overflow: 'auto', 
+        p: 2,
+        minHeight: 0,
+        '&::-webkit-scrollbar': {
+          width: '6px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: 'transparent',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: 'rgba(0,0,0,0.2)',
+          borderRadius: '3px',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          background: 'rgba(0,0,0,0.3)',
+        },
+      }}>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
             {error}
@@ -387,8 +417,15 @@ export const AgentChat: React.FC<AgentChatProps> = ({
         <div ref={messagesEndRef} />
       </Box>
 
-      {/* 输入区域 */}
-      <Paper sx={{ p: 2, borderRadius: 0 }}>
+      {/* 输入区域 - 固定在底部 */}
+      <Paper sx={{ 
+        p: 2, 
+        borderRadius: 0,
+        borderTop: 1,
+        borderColor: 'divider',
+        backgroundColor: 'background.paper',
+        flexShrink: 0
+      }}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
           <TextField
             ref={inputRef}

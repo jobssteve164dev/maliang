@@ -12,8 +12,8 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { state } = useAppContext();
-  // 侧边栏状态：默认关闭，用户可以手动控制
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  // 侧边栏状态：默认打开，用户可以手动控制
+  const [sidebarOpen, setSidebarOpen] = React.useState(true);
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);

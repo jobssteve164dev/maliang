@@ -216,7 +216,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
             location={location}
             handleNavigation={(path) => {
               handleNavigation(path);
-              onClose(); // 小屏幕导航后关闭抽屉
+              // 取消小屏幕导航后的自动关闭行为
+              // onClose(); 
             }}
             state={state}
           />

@@ -9,9 +9,24 @@ export class ProjectService {
   // 获取所有项目
   static async getAllProjects(): Promise<NovelProject[]> {
     try {
-      return await window.electronAPI.database.query(
+      const projects = await window.electronAPI.database.query(
         'SELECT * FROM projects ORDER BY updated_at DESC'
       );
+      
+      return projects.map((project: any) => ({
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        genre: project.genre,
+        targetAudience: project.target_audience,
+        status: project.status,
+        wordCount: project.word_count || 0,
+        chapterCount: project.chapter_count || 0,
+        settings: JSON.parse(project.settings || '{}'),
+        metadata: JSON.parse(project.metadata || '{}'),
+        createdAt: new Date(project.created_at),
+        updatedAt: new Date(project.updated_at),
+      }));
     } catch (error) {
       console.error('Failed to get projects:', error);
       return [];
@@ -21,11 +36,29 @@ export class ProjectService {
   // 根据ID获取项目
   static async getProjectById(projectId: string): Promise<NovelProject | null> {
     try {
-      const projects = await window.electronAPI.database.get(
+      const project = await window.electronAPI.database.get(
         'SELECT * FROM projects WHERE id = ?',
         [projectId]
       );
-      return projects || null;
+      
+      if (!project) {
+        return null;
+      }
+      
+      return {
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        genre: project.genre,
+        targetAudience: project.target_audience,
+        status: project.status,
+        wordCount: project.word_count || 0,
+        chapterCount: project.chapter_count || 0,
+        settings: JSON.parse(project.settings || '{}'),
+        metadata: JSON.parse(project.metadata || '{}'),
+        createdAt: new Date(project.created_at),
+        updatedAt: new Date(project.updated_at),
+      };
     } catch (error) {
       console.error('Failed to get project:', error);
       return null;
@@ -277,7 +310,14 @@ export class ProjectService {
       );
       
       return projects.map((project: any) => ({
-        ...project,
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        genre: project.genre,
+        targetAudience: project.target_audience,
+        status: project.status,
+        wordCount: project.word_count || 0,
+        chapterCount: project.chapter_count || 0,
         settings: JSON.parse(project.settings || '{}'),
         metadata: JSON.parse(project.metadata || '{}'),
         createdAt: new Date(project.created_at),
@@ -331,7 +371,14 @@ export class ProjectService {
       );
 
       return projects.map((project: any) => ({
-        ...project,
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        genre: project.genre,
+        targetAudience: project.target_audience,
+        status: project.status,
+        wordCount: project.word_count || 0,
+        chapterCount: project.chapter_count || 0,
         settings: JSON.parse(project.settings || '{}'),
         metadata: JSON.parse(project.metadata || '{}'),
         createdAt: new Date(project.created_at),

@@ -236,7 +236,23 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
       </Box>
 
       {/* 智能体列表 */}
-      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+      <Box sx={{ 
+        flexGrow: 1, 
+        overflow: 'auto',
+        '&::-webkit-scrollbar': {
+          width: '6px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: 'transparent',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: 'rgba(0,0,0,0.2)',
+          borderRadius: '3px',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          background: 'rgba(0,0,0,0.3)',
+        },
+      }}>
         {agents.length === 0 ? (
           <Box sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
@@ -331,7 +347,13 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
 
       {/* 底部操作区 */}
       {selectedAgent && (
-        <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ 
+          p: 2, 
+          borderTop: 1, 
+          borderColor: 'divider',
+          flexShrink: 0,
+          backgroundColor: 'background.paper'
+        }}>
           <Card variant="outlined">
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
