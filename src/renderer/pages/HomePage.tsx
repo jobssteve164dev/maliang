@@ -197,13 +197,32 @@ export const HomePage: React.FC = () => {
   const displayProjects = tabValue === 0 ? recentProjects : filteredProjects;
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ 
+      maxWidth: '1400px',
+      minWidth: { xs: '100%', sm: '600px', md: '800px', lg: '1000px' },
+      mx: 'auto',
+      px: { xs: 1, sm: 2, md: 3 },
+      py: { xs: 2, sm: 3 }
+    }}>
       {/* 页面标题 */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+      <Box sx={{ mb: 4, textAlign: { xs: 'center', sm: 'left' } }}>
+        <Typography 
+          variant="h4" 
+          component="h1" 
+          gutterBottom
+          sx={{
+            fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' }
+          }}
+        >
           我的小说项目
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography 
+          variant="body1" 
+          color="text.secondary"
+          sx={{
+            fontSize: { xs: '0.875rem', sm: '1rem' }
+          }}
+        >
           使用AI智能体协助您的创作之旅
         </Typography>
       </Box>
@@ -216,8 +235,20 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* 工具栏 */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ 
+        mb: 3, 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'stretch', sm: 'center' },
+        gap: { xs: 2, sm: 0 }
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 2,
+          justifyContent: { xs: 'center', sm: 'flex-start' }
+        }}>
           <TextField
             size="small"
             placeholder="搜索项目..."
@@ -233,7 +264,10 @@ export const HomePage: React.FC = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ width: 300 }}
+            sx={{ 
+              width: { xs: '100%', sm: 300 },
+              maxWidth: { xs: '400px', sm: '300px' }
+            }}
           />
           
           <Tooltip title="刷新">
@@ -243,7 +277,12 @@ export const HomePage: React.FC = () => {
           </Tooltip>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          justifyContent: { xs: 'center', sm: 'flex-end' }
+        }}>
           <Tooltip title="网格视图">
             <IconButton 
               onClick={() => setViewMode('grid')}
@@ -265,7 +304,11 @@ export const HomePage: React.FC = () => {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setDialogOpen(true)}
-            sx={{ ml: 2 }}
+            sx={{ 
+              ml: { xs: 0, sm: 2 },
+              minWidth: { xs: '120px', sm: 'auto' },
+              fontSize: { xs: '0.875rem', sm: '0.875rem' }
+            }}
           >
             新建项目
           </Button>
@@ -313,9 +356,9 @@ export const HomePage: React.FC = () => {
             </Button>
           </Box>
         ) : (
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {recentProjects.map((project) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
+              <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={project.id}>
                 <ProjectCard
                   project={project}
                   stats={projectStats[project.id]}
@@ -332,9 +375,9 @@ export const HomePage: React.FC = () => {
 
       <TabPanel value={tabValue} index={1}>
         {loading ? (
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {[1, 2, 3, 4, 5, 6].map((n) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={n}>
+              <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={n}>
                 <Card>
                   <CardContent>
                     <Skeleton variant="text" height={32} />
@@ -364,9 +407,9 @@ export const HomePage: React.FC = () => {
             )}
           </Box>
         ) : (
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {displayProjects.map((project) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
+              <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={project.id}>
                 <ProjectCard
                   project={project}
                   stats={projectStats[project.id]}

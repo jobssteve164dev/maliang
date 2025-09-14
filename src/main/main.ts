@@ -213,6 +213,10 @@ class NovelAIApp {
 
     // 配置管理
     ipcMain.handle('config-get', async (event, key: string) => {
+      if (!key || key === '') {
+        // 如果没有指定key或key为空，返回完整配置
+        return this.configManager.getAll();
+      }
       return this.configManager.get(key as any);
     });
 

@@ -29,6 +29,15 @@ interface SidebarProps {
   onClose: () => void;
 }
 
+interface SidebarContentProps {
+  mainMenuItems: any[];
+  projectMenuItems: any[];
+  agentMenuItems: any[];
+  location: any;
+  handleNavigation: (path: string) => void;
+  state: any;
+}
+
 export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -61,133 +70,158 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
 
   const drawerWidth = 280;
 
-  return (
-    <Drawer
-      variant="persistent"
-      anchor="left"
-      open={open}
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: drawerWidth,
-          boxSizing: 'border-box',
-          mt: 8, // 为AppBar留出空间
-        },
-      }}
-    >
-      <Box sx={{ overflow: 'auto', height: '100%' }}>
-        {/* 主导航 */}
-        <List>
-          {mainMenuItems.map((item) => (
-            <ListItem key={item.text} disablePadding>
-              <ListItemButton
-                selected={location.pathname === item.path}
-                onClick={() => handleNavigation(item.path)}
-              >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+  // 侧边栏内容组件
+  const SidebarContent: React.FC<SidebarContentProps> = ({ 
+    mainMenuItems, 
+    projectMenuItems, 
+    agentMenuItems, 
+    location, 
+    handleNavigation, 
+    state 
+  }) => (
+    <>
+      {/* 主导航 */}
+      <List>
+        {mainMenuItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton
+              selected={location.pathname === item.path}
+              onClick={() => handleNavigation(item.path)}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
 
-        <Divider />
+      <Divider />
 
-        {/* 项目导航 */}
-        {state.currentProject && (
-          <>
-            <Box sx={{ p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                当前项目
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                {state.currentProject.title}
-              </Typography>
-              <Chip 
-                label={state.currentProject.status} 
-                size="small" 
-                sx={{ mt: 1 }}
-                color={
-                  state.currentProject.status === 'completed' ? 'success' :
-                  state.currentProject.status === 'writing' ? 'primary' :
-                  state.currentProject.status === 'editing' ? 'warning' : 'default'
-                }
-              />
-            </Box>
-            
-            <List>
-              {projectMenuItems.map((item) => (
-                <ListItem key={item.text} disablePadding>
-                  <ListItemButton
-                    selected={location.pathname === item.path}
-                    onClick={() => handleNavigation(item.path)}
-                  >
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.text} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-
-            <Divider />
-          </>
-        )}
-
-        {/* AI智能体 */}
-        <Box sx={{ p: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            AI 智能体
-          </Typography>
-        </Box>
-        
-        <List>
-          {agentMenuItems.map((item) => {
-            const agent = state.agents.find(a => a.type === item.agentType);
-            const isEnabled = agent?.enabled ?? false;
-            
-            return (
+      {/* 项目导航 */}
+      {state.currentProject && (
+        <>
+          <Box sx={{ p: 2 }}>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              当前项目
+            </Typography>
+            <Typography variant="body2" fontWeight="medium">
+              {state.currentProject.title}
+            </Typography>
+          </Box>
+          <List>
+            {projectMenuItems.map((item) => (
               <ListItem key={item.text} disablePadding>
                 <ListItemButton
-                  disabled={!isEnabled || !state.currentProject}
-                  onClick={() => {
-                    if (state.currentProject) {
-                      // TODO: 打开智能体对话界面
-                      console.log(`Opening ${item.agentType} agent`);
-                    }
-                  }}
+                  selected={location.pathname === item.path}
+                  onClick={() => handleNavigation(item.path)}
                 >
-                  <ListItemIcon>
-                    <Box
-                      sx={{
-                        color: isEnabled ? item.color : 'text.disabled',
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                    >
-                      {item.icon}
-                    </Box>
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary={item.text}
-                    secondary={!isEnabled ? '未启用' : undefined}
-                  />
-                  {isEnabled && (
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: item.color,
-                      }}
-                    />
-                  )}
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
                 </ListItemButton>
               </ListItem>
-            );
-          })}
-        </List>
+            ))}
+          </List>
+          <Divider />
+        </>
+      )}
+
+      {/* AI智能体 */}
+      <Box sx={{ p: 2 }}>
+        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+          AI 智能体
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          未启用
+        </Typography>
       </Box>
-    </Drawer>
+      <List>
+        {agentMenuItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton disabled>
+              <ListItemIcon sx={{ color: item.color }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText 
+                primary={item.text}
+                secondary="未启用"
+              />
+              <Chip 
+                label="未启用" 
+                size="small" 
+                variant="outlined"
+                sx={{ fontSize: '0.7rem' }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </>
+  );
+
+  return (
+    <>
+      {/* 大屏幕：持久性侧边栏 */}
+      <Drawer
+        variant="persistent"
+        anchor="left"
+        open={open}
+        sx={{
+          display: { xs: 'none', lg: 'block' },
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            mt: 8, // 为AppBar留出空间
+          },
+        }}
+      >
+        <Box sx={{ overflow: 'auto', height: '100%' }}>
+          {/* 侧边栏内容 */}
+          <SidebarContent 
+            mainMenuItems={mainMenuItems}
+            projectMenuItems={projectMenuItems}
+            agentMenuItems={agentMenuItems}
+            location={location}
+            handleNavigation={handleNavigation}
+            state={state}
+          />
+        </Box>
+      </Drawer>
+
+      {/* 小屏幕：临时抽屉 */}
+      <Drawer
+        variant="temporary"
+        anchor="left"
+        open={open}
+        onClose={onClose}
+        ModalProps={{
+          keepMounted: true, // 更好的移动端性能
+        }}
+        sx={{
+          display: { xs: 'block', lg: 'none' },
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            mt: 8, // 为AppBar留出空间
+          },
+        }}
+      >
+        <Box sx={{ overflow: 'auto', height: '100%' }}>
+          {/* 侧边栏内容 */}
+          <SidebarContent 
+            mainMenuItems={mainMenuItems}
+            projectMenuItems={projectMenuItems}
+            agentMenuItems={agentMenuItems}
+            location={location}
+            handleNavigation={(path) => {
+              handleNavigation(path);
+              onClose(); // 小屏幕导航后关闭抽屉
+            }}
+            state={state}
+          />
+        </Box>
+      </Drawer>
+    </>
   );
 };

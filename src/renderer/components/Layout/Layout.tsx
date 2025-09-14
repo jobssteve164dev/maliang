@@ -12,7 +12,8 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { state } = useAppContext();
-  const [sidebarOpen, setSidebarOpen] = React.useState(true);
+  // 侧边栏状态：默认关闭，用户可以手动控制
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -66,13 +67,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          mt: 8, // 为AppBar留出空间
-          ml: sidebarOpen ? '280px' : 0,
-          transition: (theme) => theme.transitions.create(['margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh',
+          pt: 8, // 为AppBar留出空间
+          overflow: 'hidden', // 防止整个页面滚动
         }}
       >
         {children}

@@ -237,14 +237,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // 加载配置
   const loadConfig = useCallback(async () => {
     try {
+      console.log('🔍 [DEBUG] AppContext.loadConfig() - starting...');
       const config = await window.electronAPI.config.get('');
+      console.log('🔍 [DEBUG] AppContext.loadConfig() - received config:', config);
+      console.log('🔍 [DEBUG] AppContext.loadConfig() - config.aiModels:', config?.aiModels);
+      console.log('🔍 [DEBUG] AppContext.loadConfig() - config.agents:', config?.agents);
+      
       dispatch({ type: 'SET_CONFIG', payload: config as AppConfig });
       
       if (config && config.agents) {
+        console.log('🔍 [DEBUG] AppContext.loadConfig() - setting agents:', config.agents.length);
         dispatch({ type: 'SET_AGENTS', payload: config.agents });
+      } else {
+        console.log('🔍 [DEBUG] AppContext.loadConfig() - no agents in config');
       }
     } catch (error) {
-      console.error('Failed to load config:', error);
+      console.error('❌ [ERROR] Failed to load config:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load configuration' });
     }
   }, []);
