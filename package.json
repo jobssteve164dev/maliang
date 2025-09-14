@@ -64,7 +64,7 @@
     "concurrently": "^8.2.1",
     "cross-env": "^7.0.3",
     "css-loader": "^6.8.1",
-    "electron": "^26.2.1",
+    "electron": "^35.7.5",
     "electron-builder": "^24.6.4",
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
@@ -81,7 +81,7 @@
     "wait-on": "^7.0.1",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1"
+    "webpack-dev-server": "^5.2.1"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
