@@ -8,9 +8,14 @@ import { SettingsPage } from './pages/SettingsPage';
 import { useAppContext } from './contexts/AppContext';
 
 export const App: React.FC = () => {
+  console.log('🔍 [DEBUG] App component rendering...');
+  
   const { initializeApp } = useAppContext();
+  
+  console.log('🔍 [DEBUG] App got initializeApp function:', typeof initializeApp);
 
   useEffect(() => {
+    console.log('🔍 [DEBUG] App useEffect running, calling initializeApp...');
     initializeApp();
   }, [initializeApp]);
 

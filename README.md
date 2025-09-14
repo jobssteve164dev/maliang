@@ -10,35 +10,41 @@
 - **npm**: 7.0.0 或更高版本
 - **操作系统**: macOS, Windows, Linux
 
-### 安装与启动
+### 🎯 一键安装与启动
 
-#### 方式一：使用开发脚本（推荐）
+#### 🚀 自动安装模式（推荐）
 
-**Linux/macOS:**
 ```bash
-# 完整的开发环境启动（包含所有检查）
+# 🔍 检查当前环境状态
+./dev.sh --check-env
+
+# 🚀 一键自动安装 Node.js 和依赖
+./dev.sh --setup
+
+# 💬 交互式安装（会询问是否自动安装）
 ./dev.sh
+```
 
-# 快速启动（最小化检查）
-./start.sh
+#### 🛠️ 开发脚本选项
 
-# 清理后启动
-./dev.sh --clean
-
-# 重新安装依赖后启动
-./dev.sh --install
-
-# 查看所有选项
-./dev.sh --help
+**Linux/macOS/Git Bash:**
+```bash
+./dev.sh --help              # 显示所有选项
+./dev.sh --setup             # 自动安装环境和依赖
+./dev.sh --check-env         # 仅检查环境状态
+./dev.sh --no-interactive    # 非交互模式
+./dev.sh --clean             # 清理后启动
+./dev.sh --install           # 重新安装依赖
+./dev.sh --type --lint       # 类型检查和代码风格检查
 ```
 
 **Windows:**
 ```cmd
-# 使用批处理文件
+# 使用批处理文件（支持自动安装）
 dev.bat
 
-# 或在 Git Bash 中使用
-./dev.sh
+# 或在 Git Bash 中使用完整功能
+./dev.sh --setup
 ```
 
 #### 方式二：手动启动

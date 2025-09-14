@@ -1,276 +1,403 @@
-import React, { useState } from 'react';
+/**
+ * 主页组件
+ * 显示项目列表、最近项目和快速操作
+ */
+
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
   Button,
+  Grid,
   Card,
   CardContent,
-  CardActions,
-  Grid,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
-  MenuItem,
-  CircularProgress,
+  InputAdornment,
+  Fab,
+  Skeleton,
+  Alert,
+  Chip,
+  Tabs,
+  Tab,
+  IconButton,
+  Tooltip
 } from '@mui/material';
-import { Add as AddIcon, Book as BookIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '@renderer/contexts/AppContext';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  ViewModule as GridViewIcon,
+  ViewList as ListViewIcon,
+  FilterList as FilterIcon
+} from '@mui/icons-material';
 import { NovelProject } from '@shared/types';
+import { ProjectService } from '../services/ProjectService';
+import { ProjectCard } from '../components/ProjectCard';
+import { ProjectDialog } from '../components/ProjectDialog';
 
-export const HomePage: React.FC = () => {
-  const navigate = useNavigate();
-  const { state, createProject, setCurrentProject } = useAppContext();
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [newProject, setNewProject] = useState({
-    title: '',
-    description: '',
-    genre: '',
-    targetAudience: '',
-  });
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
 
-  const genres = [
-    '科幻小说',
-    '奇幻小说',
-    '悬疑推理',
-    '言情小说',
-    '历史小说',
-    '武侠小说',
-    '都市小说',
-    '青春小说',
-    '其他',
-  ];
-
-  const audiences = [
-    '青少年',
-    '成年人',
-    '全年龄',
-    '专业读者',
-  ];
-
-  const handleCreateProject = async () => {
-    if (!newProject.title.trim()) return;
-
-    try {
-      setCreating(true);
-      const project = await createProject({
-        ...newProject,
-        status: 'planning',
-        wordCount: 0,
-        chapterCount: 0,
-      });
-      
-      setCurrentProject(project);
-      setCreateDialogOpen(false);
-      setNewProject({ title: '', description: '', genre: '', targetAudience: '' });
-      navigate(`/project/${project.id}`);
-    } catch (error) {
-      console.error('Failed to create project:', error);
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const handleOpenProject = (project: NovelProject) => {
-    setCurrentProject(project);
-    navigate(`/project/${project.id}`);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'success';
-      case 'writing': return 'primary';
-      case 'editing': return 'warning';
-      default: return 'default';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'planning': return '规划中';
-      case 'writing': return '写作中';
-      case 'editing': return '编辑中';
-      case 'completed': return '已完成';
-      default: return status;
-    }
-  };
-
-  if (!state.isInitialized) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
 
   return (
-    <Box>
-      {/* 页面标题和创建按钮 */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4" component="h1">
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`project-tabpanel-${index}`}
+      aria-labelledby={`project-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ py: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
+export const HomePage: React.FC = () => {
+  const [projects, setProjects] = useState<NovelProject[]>([]);
+  const [recentProjects, setRecentProjects] = useState<NovelProject[]>([]);
+  const [projectStats, setProjectStats] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [tabValue, setTabValue] = useState(0);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<NovelProject | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // 加载项目数据
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+      const [allProjects, recent] = await Promise.all([
+        ProjectService.getAllProjects(),
+        ProjectService.getRecentProjects()
+      ]);
+
+      setProjects(allProjects);
+      setRecentProjects(recent);
+
+      // 加载项目统计
+      const stats: Record<string, any> = {};
+      for (const project of allProjects) {
+        stats[project.id] = await ProjectService.getProjectStats(project.id);
+      }
+      setProjectStats(stats);
+
+      setError(null);
+    } catch (err: any) {
+      console.error('Failed to load projects:', err);
+      setError('加载项目失败，请重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  // 搜索项目
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      loadProjects();
+      return;
+    }
+
+    try {
+      const searchResults = await ProjectService.searchProjects(query);
+      setProjects(searchResults);
+    } catch (err) {
+      console.error('Search failed:', err);
+    }
+  };
+
+  // 创建项目
+  const handleCreateProject = async (projectData: Omit<NovelProject, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      await ProjectService.createProject(projectData);
+      await loadProjects();
+      setDialogOpen(false);
+    } catch (err: any) {
+      throw new Error(err.message || '创建项目失败');
+    }
+  };
+
+  // 更新项目
+  const handleUpdateProject = async (projectData: Omit<NovelProject, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!editingProject) return;
+
+    try {
+      await ProjectService.updateProject(editingProject.id, projectData);
+      await loadProjects();
+      setDialogOpen(false);
+      setEditingProject(null);
+    } catch (err: any) {
+      throw new Error(err.message || '更新项目失败');
+    }
+  };
+
+  // 打开项目
+  const handleOpenProject = (projectId: string) => {
+    window.location.href = `#/project/${projectId}`;
+  };
+
+  // 编辑项目
+  const handleEditProject = (project: NovelProject) => {
+    setEditingProject(project);
+    setDialogOpen(true);
+  };
+
+  // 删除项目
+  const handleDeleteProject = async (projectId: string) => {
+    if (!window.confirm('确定要删除这个项目吗？此操作不可撤销。')) {
+      return;
+    }
+
+    try {
+      await ProjectService.deleteProject(projectId);
+      await loadProjects();
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+      alert('删除项目失败，请重试');
+    }
+  };
+
+  // 查看项目统计
+  const handleViewStats = (projectId: string) => {
+    // TODO: 打开项目统计对话框
+    console.log('View stats for project:', projectId);
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setEditingProject(null);
+  };
+
+  const filteredProjects = searchQuery 
+    ? projects.filter(p => 
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.genre.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : projects;
+
+  const displayProjects = tabValue === 0 ? recentProjects : filteredProjects;
+
+  return (
+    <Box sx={{ p: 3 }}>
+      {/* 页面标题 */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
           我的小说项目
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateDialogOpen(true)}
-        >
-          创建新项目
-        </Button>
+        <Typography variant="body1" color="text.secondary">
+          使用AI智能体协助您的创作之旅
+        </Typography>
       </Box>
 
-      {/* 项目列表 */}
-      {state.projects.length === 0 ? (
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          minHeight="400px"
-          textAlign="center"
-        >
-          <BookIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            还没有任何项目
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mb={3}>
-            创建你的第一个小说项目，开始AI辅助创作之旅
-          </Typography>
+      {/* 错误提示 */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      {/* 工具栏 */}
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <TextField
+            size="small"
+            placeholder="搜索项目..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              handleSearch(e.target.value);
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: 300 }}
+          />
+          
+          <Tooltip title="刷新">
+            <IconButton onClick={loadProjects} disabled={loading}>
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Tooltip title="网格视图">
+            <IconButton 
+              onClick={() => setViewMode('grid')}
+              color={viewMode === 'grid' ? 'primary' : 'default'}
+            >
+              <GridViewIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="列表视图">
+            <IconButton 
+              onClick={() => setViewMode('list')}
+              color={viewMode === 'list' ? 'primary' : 'default'}
+            >
+              <ListViewIcon />
+            </IconButton>
+          </Tooltip>
+
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => setCreateDialogOpen(true)}
+            onClick={() => setDialogOpen(true)}
+            sx={{ ml: 2 }}
           >
-            创建新项目
+            新建项目
           </Button>
         </Box>
-      ) : (
-        <Grid container spacing={3}>
-          {state.projects.map((project) => (
-            <Grid item xs={12} sm={6} md={4} key={project.id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6" component="h2" gutterBottom>
-                    {project.title}
-                  </Typography>
-                  
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    {project.description || '暂无描述'}
-                  </Typography>
-                  
-                  <Box display="flex" gap={1} mb={2}>
-                    <Chip label={project.genre} size="small" />
-                    <Chip 
-                      label={getStatusText(project.status)} 
-                      size="small" 
-                      color={getStatusColor(project.status)}
-                    />
-                  </Box>
-                  
-                  <Typography variant="caption" color="text.secondary">
-                    字数: {project.wordCount.toLocaleString()} | 
-                    章节: {project.chapterCount} | 
-                    更新: {project.updatedAt.toLocaleDateString()}
-                  </Typography>
-                </CardContent>
-                
-                <CardActions>
-                  <Button 
-                    size="small" 
-                    onClick={() => handleOpenProject(project)}
-                  >
-                    打开项目
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      )}
+      </Box>
 
-      {/* 创建项目对话框 */}
-      <Dialog 
-        open={createDialogOpen} 
-        onClose={() => setCreateDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
+      {/* 标签页 */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs value={tabValue} onChange={handleTabChange}>
+          <Tab label={`最近项目 (${recentProjects.length})`} />
+          <Tab label={`所有项目 (${projects.length})`} />
+        </Tabs>
+      </Box>
+
+      {/* 项目列表 */}
+      <TabPanel value={tabValue} index={0}>
+        {loading ? (
+          <Grid container spacing={3}>
+            {[1, 2, 3, 4].map((n) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={n}>
+                <Card>
+                  <CardContent>
+                    <Skeleton variant="text" height={32} />
+                    <Skeleton variant="text" height={60} />
+                    <Skeleton variant="rectangular" height={100} />
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        ) : recentProjects.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              还没有项目
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              创建您的第一个小说项目，开始AI辅助创作之旅
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setDialogOpen(true)}
+            >
+              创建新项目
+            </Button>
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            {recentProjects.map((project) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
+                <ProjectCard
+                  project={project}
+                  stats={projectStats[project.id]}
+                  onOpen={handleOpenProject}
+                  onEdit={handleEditProject}
+                  onDelete={handleDeleteProject}
+                  onViewStats={handleViewStats}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={1}>
+        {loading ? (
+          <Grid container spacing={3}>
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={n}>
+                <Card>
+                  <CardContent>
+                    <Skeleton variant="text" height={32} />
+                    <Skeleton variant="text" height={60} />
+                    <Skeleton variant="rectangular" height={100} />
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        ) : displayProjects.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              {searchQuery ? '没有找到匹配的项目' : '还没有项目'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {searchQuery ? '尝试使用不同的关键词搜索' : '创建您的第一个小说项目'}
+            </Typography>
+            {!searchQuery && (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setDialogOpen(true)}
+              >
+                创建新项目
+              </Button>
+            )}
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            {displayProjects.map((project) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
+                <ProjectCard
+                  project={project}
+                  stats={projectStats[project.id]}
+                  onOpen={handleOpenProject}
+                  onEdit={handleEditProject}
+                  onDelete={handleDeleteProject}
+                  onViewStats={handleViewStats}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </TabPanel>
+
+      {/* 浮动操作按钮 */}
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{ position: 'fixed', bottom: 24, right: 24 }}
+        onClick={() => setDialogOpen(true)}
       >
-        <DialogTitle>创建新的小说项目</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="项目标题"
-            fullWidth
-            variant="outlined"
-            value={newProject.title}
-            onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-            sx={{ mb: 2 }}
-          />
-          
-          <TextField
-            margin="dense"
-            label="项目描述"
-            fullWidth
-            multiline
-            rows={3}
-            variant="outlined"
-            value={newProject.description}
-            onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-            sx={{ mb: 2 }}
-          />
-          
-          <TextField
-            select
-            margin="dense"
-            label="小说类型"
-            fullWidth
-            variant="outlined"
-            value={newProject.genre}
-            onChange={(e) => setNewProject({ ...newProject, genre: e.target.value })}
-            sx={{ mb: 2 }}
-          >
-            {genres.map((genre) => (
-              <MenuItem key={genre} value={genre}>
-                {genre}
-              </MenuItem>
-            ))}
-          </TextField>
-          
-          <TextField
-            select
-            margin="dense"
-            label="目标读者"
-            fullWidth
-            variant="outlined"
-            value={newProject.targetAudience}
-            onChange={(e) => setNewProject({ ...newProject, targetAudience: e.target.value })}
-          >
-            {audiences.map((audience) => (
-              <MenuItem key={audience} value={audience}>
-                {audience}
-              </MenuItem>
-            ))}
-          </TextField>
-        </DialogContent>
-        
-        <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)}>
-            取消
-          </Button>
-          <Button 
-            onClick={handleCreateProject}
-            variant="contained"
-            disabled={!newProject.title.trim() || creating}
-          >
-            {creating ? <CircularProgress size={20} /> : '创建'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <AddIcon />
+      </Fab>
+
+      {/* 项目创建/编辑对话框 */}
+      <ProjectDialog
+        open={dialogOpen}
+        project={editingProject}
+        onClose={handleDialogClose}
+        onSave={editingProject ? handleUpdateProject : handleCreateProject}
+      />
     </Box>
   );
 };

@@ -3,15 +3,21 @@ import * as path from 'path';
 import { isDev } from '@shared/utils/environment';
 import { DatabaseManager } from '@database/DatabaseManager';
 import { ConfigManager } from '@services/ConfigManager';
+import { AIService } from '@services/AIService';
+import { AgentManager } from '@agents/AgentManager';
 
 class NovelAIApp {
   private mainWindow: BrowserWindow | null = null;
   private databaseManager: DatabaseManager;
   private configManager: ConfigManager;
+  private aiService: AIService;
+  private agentManager: AgentManager;
 
   constructor() {
     this.databaseManager = new DatabaseManager();
     this.configManager = new ConfigManager();
+    this.aiService = new AIService(this.configManager, this.databaseManager);
+    this.agentManager = new AgentManager(this.aiService, this.configManager, this.databaseManager);
     this.initializeApp();
   }
 
@@ -60,7 +66,6 @@ class NovelAIApp {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        enableRemoteModule: false,
         preload: path.join(__dirname, 'preload.js')
       },
       titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
@@ -78,7 +83,7 @@ class NovelAIApp {
 
     // 加载应用
     if (isDev()) {
-      this.mainWindow.loadURL('http://localhost:3000');
+      this.mainWindow.loadURL('http://localhost:3333');
     } else {
       this.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
     }
@@ -202,13 +207,111 @@ class NovelAIApp {
       return this.databaseManager.run(query, params);
     });
 
+    ipcMain.handle('db-get', async (event, query: string, params?: any[]) => {
+      return this.databaseManager.get(query, params);
+    });
+
     // 配置管理
     ipcMain.handle('config-get', async (event, key: string) => {
-      return this.configManager.get(key);
+      return this.configManager.get(key as any);
     });
 
     ipcMain.handle('config-set', async (event, key: string, value: any) => {
-      return this.configManager.set(key, value);
+      return this.configManager.set(key as any, value);
+    });
+
+    // AI服务相关
+    ipcMain.handle('ai-send-message', async (event, agentId: string, projectId: string, message: string, context?: Record<string, any>) => {
+      return this.aiService.sendMessage(agentId, projectId, message, context);
+    });
+
+    ipcMain.handle('ai-get-conversation-history', async (event, projectId: string, agentId: string, limit?: number) => {
+      return this.aiService.getConversationHistory(projectId, agentId, limit);
+    });
+
+    ipcMain.handle('ai-clear-conversation', async (event, projectId: string, agentId: string) => {
+      return this.aiService.clearConversationHistory(projectId, agentId);
+    });
+
+    ipcMain.handle('ai-get-available-agents', () => {
+      return this.aiService.getAvailableAgents();
+    });
+
+    ipcMain.handle('ai-validate-config', async () => {
+      return this.aiService.validateConfiguration();
+    });
+
+    ipcMain.handle('ai-test-provider', async (event, providerKey: string) => {
+      return this.aiService.testProvider(providerKey);
+    });
+
+    ipcMain.handle('ai-get-available-models', async (event, providerKey: string) => {
+      return this.aiService.getAvailableModels(providerKey);
+    });
+
+    ipcMain.handle('ai-get-provider-stats', () => {
+      return this.aiService.getProviderStats();
+    });
+
+    ipcMain.handle('ai-get-usage-stats', async (event, projectId: string) => {
+      return this.aiService.getAgentUsageStats(projectId);
+    });
+
+    // 智能体管理相关
+    ipcMain.handle('agent-send-message', async (event, agentId: string, context: any) => {
+      return this.agentManager.sendMessage(agentId, context);
+    });
+
+    ipcMain.handle('agent-send-to-type', async (event, agentType: string, context: any) => {
+      return this.agentManager.sendMessageToAgentType(agentType, context);
+    });
+
+    ipcMain.handle('agent-execute-workflow', async (event, workflowId: string, context: any) => {
+      return this.agentManager.executeWorkflow(workflowId, context);
+    });
+
+    ipcMain.handle('agent-start-collaboration', async (event, projectId: string, topic: string, agentTypes: string[]) => {
+      return this.agentManager.startCollaboration(projectId, topic, agentTypes);
+    });
+
+    ipcMain.handle('agent-get-available', () => {
+      return this.agentManager.getAvailableAgents();
+    });
+
+    ipcMain.handle('agent-get-by-type', (event, agentType: string) => {
+      return this.agentManager.getAgentsByType(agentType);
+    });
+
+    ipcMain.handle('agent-is-available', (event, agentId: string) => {
+      return this.agentManager.isAgentAvailable(agentId);
+    });
+
+    ipcMain.handle('agent-update-config', (event, agentId: string, config: any) => {
+      return this.agentManager.updateAgentConfig(agentId, config);
+    });
+
+    ipcMain.handle('agent-set-enabled', (event, agentId: string, enabled: boolean) => {
+      return this.agentManager.setAgentEnabled(agentId, enabled);
+    });
+
+    ipcMain.handle('agent-get-stats', async (event, projectId?: string) => {
+      return this.agentManager.getAgentUsageStats(projectId);
+    });
+
+    ipcMain.handle('agent-test', async (event, agentId: string, testContext: any) => {
+      return this.agentManager.testAgent(agentId, testContext);
+    });
+
+    ipcMain.handle('agent-get-collaboration-history', async (event, projectId: string, agentId?: string) => {
+      return this.agentManager.getCollaborationHistory(projectId, agentId);
+    });
+
+    ipcMain.handle('agent-batch-process', async (event, requests: any[]) => {
+      return this.agentManager.batchProcess(requests);
+    });
+
+    ipcMain.handle('agent-get-workflows', (event, projectType: string, currentStage: string) => {
+      return this.agentManager.getRecommendedWorkflows(projectType, currentStage);
     });
 
     // 应用控制

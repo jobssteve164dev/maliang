@@ -7,7 +7,9 @@ const electronAPI = {
     query: (query: string, params?: any[]) => 
       ipcRenderer.invoke('db-query', query, params),
     run: (query: string, params?: any[]) => 
-      ipcRenderer.invoke('db-run', query, params)
+      ipcRenderer.invoke('db-run', query, params),
+    get: (query: string, params?: any[]) => 
+      ipcRenderer.invoke('db-get', query, params)
   },
 
   // 配置管理
@@ -21,6 +23,60 @@ const electronAPI = {
     quit: () => ipcRenderer.invoke('app-quit'),
     minimize: () => ipcRenderer.invoke('app-minimize'),
     maximize: () => ipcRenderer.invoke('app-maximize')
+  },
+
+  // AI服务
+  ai: {
+    sendMessage: (agentId: string, projectId: string, message: string, context?: Record<string, any>) =>
+      ipcRenderer.invoke('ai-send-message', agentId, projectId, message, context),
+    getConversationHistory: (projectId: string, agentId: string, limit?: number) =>
+      ipcRenderer.invoke('ai-get-conversation-history', projectId, agentId, limit),
+    clearConversation: (projectId: string, agentId: string) =>
+      ipcRenderer.invoke('ai-clear-conversation', projectId, agentId),
+    getAvailableAgents: () =>
+      ipcRenderer.invoke('ai-get-available-agents'),
+    validateConfig: () =>
+      ipcRenderer.invoke('ai-validate-config'),
+    testProvider: (providerKey: string) =>
+      ipcRenderer.invoke('ai-test-provider', providerKey),
+    getAvailableModels: (providerKey: string) =>
+      ipcRenderer.invoke('ai-get-available-models', providerKey),
+    getProviderStats: () =>
+      ipcRenderer.invoke('ai-get-provider-stats'),
+    getUsageStats: (projectId: string) =>
+      ipcRenderer.invoke('ai-get-usage-stats', projectId)
+  },
+
+  // 智能体管理
+  agent: {
+    sendMessage: (agentId: string, context: any) =>
+      ipcRenderer.invoke('agent-send-message', agentId, context),
+    sendToType: (agentType: string, context: any) =>
+      ipcRenderer.invoke('agent-send-to-type', agentType, context),
+    executeWorkflow: (workflowId: string, context: any) =>
+      ipcRenderer.invoke('agent-execute-workflow', workflowId, context),
+    startCollaboration: (projectId: string, topic: string, agentTypes: string[]) =>
+      ipcRenderer.invoke('agent-start-collaboration', projectId, topic, agentTypes),
+    getAvailable: () =>
+      ipcRenderer.invoke('agent-get-available'),
+    getByType: (agentType: string) =>
+      ipcRenderer.invoke('agent-get-by-type', agentType),
+    isAvailable: (agentId: string) =>
+      ipcRenderer.invoke('agent-is-available', agentId),
+    updateConfig: (agentId: string, config: any) =>
+      ipcRenderer.invoke('agent-update-config', agentId, config),
+    setEnabled: (agentId: string, enabled: boolean) =>
+      ipcRenderer.invoke('agent-set-enabled', agentId, enabled),
+    getStats: (projectId?: string) =>
+      ipcRenderer.invoke('agent-get-stats', projectId),
+    test: (agentId: string, testContext: any) =>
+      ipcRenderer.invoke('agent-test', agentId, testContext),
+    getCollaborationHistory: (projectId: string, agentId?: string) =>
+      ipcRenderer.invoke('agent-get-collaboration-history', projectId, agentId),
+    batchProcess: (requests: any[]) =>
+      ipcRenderer.invoke('agent-batch-process', requests),
+    getWorkflows: (projectType: string, currentStage: string) =>
+      ipcRenderer.invoke('agent-get-workflows', projectType, currentStage)
   },
 
   // 菜单事件监听

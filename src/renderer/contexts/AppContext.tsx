@@ -100,24 +100,34 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  console.log('🔍 [DEBUG] AppProvider initializing...');
+  
   const [state, dispatch] = useReducer(appReducer, initialState);
+  
+  console.log('🔍 [DEBUG] AppProvider state:', state);
 
   // 初始化应用
   const initializeApp = useCallback(async () => {
+    console.log('🔍 [DEBUG] initializeApp called');
     try {
+      console.log('🔍 [DEBUG] Setting loading to true');
       dispatch({ type: 'SET_LOADING', payload: true });
       
+      console.log('🔍 [DEBUG] Loading config...');
       // 加载配置
       await loadConfig();
       
+      console.log('🔍 [DEBUG] Loading projects...');
       // 加载项目列表
       await loadProjects();
       
+      console.log('🔍 [DEBUG] Setting initialized to true');
       dispatch({ type: 'SET_INITIALIZED', payload: true });
     } catch (error) {
-      console.error('Failed to initialize app:', error);
+      console.error('❌ [ERROR] Failed to initialize app:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to initialize application' });
     } finally {
+      console.log('🔍 [DEBUG] Setting loading to false');
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   }, []);
@@ -129,7 +139,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         'SELECT * FROM projects ORDER BY updated_at DESC'
       );
       
-      const formattedProjects: NovelProject[] = projects.map(p => ({
+      const formattedProjects: NovelProject[] = projects.map((p: any) => ({
         id: p.id,
         title: p.title,
         description: p.description,

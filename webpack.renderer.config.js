@@ -4,14 +4,19 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
   entry: './src/renderer/index.tsx',
-  target: 'electron-renderer',
+  target: 'web',
   devtool: 'source-map',
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         include: /src/,
-        use: [{ loader: 'ts-loader' }]
+        use: [{ 
+          loader: 'ts-loader',
+          options: {
+            configFile: 'tsconfig.renderer.json'
+          }
+        }]
       },
       {
         test: /\.css$/,
@@ -24,15 +29,21 @@ module.exports = {
     ]
   },
   devServer: {
-    port: 3000,
+    port: 3333,
     hot: true,
     compress: true,
-    historyApiFallback: true
+    historyApiFallback: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+    allowedHosts: 'all'
   },
   output: {
     path: path.resolve(__dirname, './dist/renderer'),
     filename: 'js/[name].[contenthash].js',
-    clean: true
+    publicPath: process.env.NODE_ENV === 'development' ? '/' : './',
+    clean: true,
+    globalObject: 'this'
   },
   plugins: [
     new HtmlWebpackPlugin({
