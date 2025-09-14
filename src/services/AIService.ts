@@ -76,8 +76,25 @@ export class AIService {
       context: { ...conversation.context, ...context },
     };
 
-    // 发送请求
-    const providerKey = `${agent.modelConfig.provider}-${agent.modelConfig.model}`;
+    // 发送请求 - 优先使用用户启用的AI模型
+    const enabledModels = this.configManager.getEnabledAIModels();
+    let providerKey: string;
+    
+    if (enabledModels.length > 0) {
+      // 使用用户启用的第一个AI模型
+      const primaryModel = enabledModels[0];
+      providerKey = `${primaryModel.provider}-${primaryModel.model}`;
+      console.log(`🔍 [DEBUG] AIService: Using enabled AI model: ${providerKey}`);
+      
+      // 更新请求参数以使用启用模型的配置
+      request.maxTokens = primaryModel.maxTokens;
+      request.temperature = primaryModel.temperature;
+    } else {
+      // 回退到智能体硬编码配置（向后兼容）
+      providerKey = `${agent.modelConfig.provider}-${agent.modelConfig.model}`;
+      console.warn(`🔍 [WARNING] AIService: No enabled AI models found, using agent default: ${providerKey}`);
+    }
+    
     const response = await this.providerManager.sendRequest(request, providerKey);
 
     // 保存对话记录

@@ -53,7 +53,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
     >
       {value === index && (
         <Box sx={{ 
-          p: { xs: 1, sm: 2, md: 3 }, // 响应式内边距
+          p: { xs: 1.5, sm: 2, md: 2.5, lg: 3 }, // 优化内边距
           flex: 1,
           overflow: 'auto',
           '&::-webkit-scrollbar': {
@@ -227,13 +227,13 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <Box sx={{ 
+      width: '100%',
       height: '100%', 
       display: 'flex', 
       flexDirection: 'column',
       overflow: 'hidden',
-      maxWidth: '1400px', // 限制最大宽度
-      mx: 'auto', // 水平居中
-      px: { xs: 1, sm: 2, md: 3 }, // 响应式内边距
+      px: { xs: 2, sm: 3, md: 4, lg: 6 }, // 增大内边距以充分利用空间
+      py: 2,
     }}>
       <Typography 
         variant="h4" 
@@ -279,7 +279,7 @@ export const SettingsPage: React.FC = () => {
             配置不同的AI模型提供商，用于驱动智能体功能
           </Typography>
 
-                    <Grid container spacing={{ xs: 2, sm: 3 }}>
+                    <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5, lg: 3 }}>
                       {aiModels.map((model, index) => (
                         <Grid item xs={12} sm={12} md={6} lg={6} xl={4} key={`${model.provider}-${index}`}>
                 <Card>
@@ -505,7 +505,7 @@ export const SettingsPage: React.FC = () => {
             管理AI智能体的启用状态和配置
           </Typography>
 
-          <Grid container spacing={{ xs: 2, sm: 3 }}>
+          <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5, lg: 3 }}>
             {state.agents.map((agent) => (
               <Grid item xs={12} sm={12} md={6} lg={6} xl={4} key={agent.id}>
                 <Card>
@@ -546,7 +546,6 @@ export const SettingsPage: React.FC = () => {
         {/* 通用设置 */}
         <TabPanel value={tabValue} index={2}>
           <Box sx={{ 
-            minWidth: { xs: '100%', sm: '600px', md: '800px', lg: '1000px' },
             width: '100%'
           }}>
             <Typography 
@@ -571,9 +570,8 @@ export const SettingsPage: React.FC = () => {
           
           <Grid 
             container 
-            spacing={{ xs: 2, sm: 3 }}
+            spacing={{ xs: 1.5, sm: 2, md: 2.5, lg: 3 }}
             sx={{ 
-              minWidth: { xs: '100%', sm: '600px', md: '800px', lg: '1000px' },
               width: '100%'
             }}
           >

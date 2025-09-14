@@ -68,7 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
     { text: '情节顾问', icon: <PlotIcon />, agentType: 'plot', color: '#795548' },
   ];
 
-  const drawerWidth = 280;
+  const drawerWidth = { xs: 260, lg: 280 }; // 小屏幕减少宽度
 
   // 侧边栏内容组件
   const SidebarContent: React.FC<SidebarContentProps> = ({ 

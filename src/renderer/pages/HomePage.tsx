@@ -206,11 +206,10 @@ export const HomePage: React.FC = () => {
 
   return (
     <Box sx={{ 
-      maxWidth: '1400px',
-      minWidth: { xs: '100%', sm: '600px', md: '800px', lg: '1000px' },
-      mx: 'auto',
-      px: { xs: 1, sm: 2, md: 3 },
-      py: { xs: 2, sm: 3 }
+      width: '100%',
+      px: { xs: 2, sm: 3, md: 4, lg: 6 },
+      py: { xs: 2, sm: 3 },
+      minHeight: 'calc(100vh - 64px)' // 减去顶部导航栏高度
     }}>
       {/* 页面标题 */}
       <Box sx={{ mb: 4, textAlign: { xs: 'center', sm: 'left' } }}>
@@ -279,9 +278,11 @@ export const HomePage: React.FC = () => {
           />
           
           <Tooltip title="刷新">
-            <IconButton onClick={loadProjects} disabled={loading}>
-              <RefreshIcon />
-            </IconButton>
+            <span>
+              <IconButton onClick={loadProjects} disabled={loading}>
+                <RefreshIcon />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
 
@@ -334,9 +335,9 @@ export const HomePage: React.FC = () => {
       {/* 项目列表 */}
       <TabPanel value={tabValue} index={0}>
         {loading ? (
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5, lg: 3 }}>
             {[1, 2, 3, 4].map((n) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={n}>
+              <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={n}>
                 <Card>
                   <CardContent>
                     <Skeleton variant="text" height={32} />
@@ -364,7 +365,7 @@ export const HomePage: React.FC = () => {
             </Button>
           </Box>
         ) : (
-          <Grid container spacing={{ xs: 2, sm: 3 }}>
+          <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5, lg: 3 }}>
             {recentProjects.map((project) => (
               <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={project.id}>
                 <ProjectCard
@@ -383,7 +384,7 @@ export const HomePage: React.FC = () => {
 
       <TabPanel value={tabValue} index={1}>
         {loading ? (
-          <Grid container spacing={{ xs: 2, sm: 3 }}>
+          <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5, lg: 3 }}>
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={n}>
                 <Card>
@@ -415,7 +416,7 @@ export const HomePage: React.FC = () => {
             )}
           </Box>
         ) : (
-          <Grid container spacing={{ xs: 2, sm: 3 }}>
+          <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5, lg: 3 }}>
             {displayProjects.map((project) => (
               <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={project.id}>
                 <ProjectCard

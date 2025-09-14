@@ -71,7 +71,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           flexDirection: 'column',
           height: '100vh',
           pt: 8, // 为AppBar留出空间
-          overflow: 'hidden', // 防止整个页面滚动
+          overflow: 'auto', // 允许内容滚动
+          backgroundColor: 'background.default',
         }}
       >
         {children}
